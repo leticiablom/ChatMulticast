@@ -26,6 +26,18 @@ public class ChatApp {
         }
     }
 
+    
+  private boolean sendMessage(String message) {
+    try {
+      byte[] buffer = message.getBytes();
+      DatagramPacket messageOut = new DatagramPacket(buffer, buffer.length, groupIp, PORT);
+      mSocket.send(messageOut);
+    } catch (IOException e) {
+      System.out.println("Erro ao enviar mensagem: " + e.getMessage());
+    }
+    return true;
+  }
+
     private void leaveRoom() {
         try {
             mSocket.leaveGroup(group, null);
@@ -57,6 +69,8 @@ public class ChatApp {
             }
         }
     }
+
+
     
 
     public static void main(String[] args) {
