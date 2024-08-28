@@ -1,6 +1,43 @@
-import java.util.*;
+import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.MulticastSocket;
 
-public class Main {
+public class ChatApp {
+    private String user;
+    private String host;
+    private static final int PORT = 6789;
+    MulticastSocket mSocket = null;
+    InetAddress groupIp = null;
+    InetSocketAddress group = null;
+
+    private boolean enterRoom() {
+        try {
+            groupIp = InetAddress.getByName(host);
+            group = new InetSocketAddress(groupIp, PORT);
+
+            mSocket = new MulticastSocket(PORT);
+            mSocket.joinGroup(group, null);
+
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    private void leaveRoom() {
+        try {
+            mSocket.leaveGroup(group, null);
+            if (mSocket != null) {
+                mSocket.close();
+            }
+        } catch (IOException e) {
+            System.out.println(
+                    "Ocorreu um erro ao sair do grupo. Verifique se o endereço está correto e tente novamente.");
+        }
+    }
+
     public static void main(String[] args) {
         if (args.length != 2) {
             System.out.println("É preciso executar o programa passando o nome do usuário e o host");
