@@ -38,25 +38,47 @@ public class ChatApp {
         }
     }
 
+    private boolean isConnected() {
+        return mSocket != null && !mSocket.isClosed();
+    }
+    
+    private void receiveMessages() {
+        byte[] buffer = new byte[1000];
+        try {
+            while (isConnected()) {
+                DatagramPacket messageIn = new DatagramPacket(buffer, buffer.length);
+                mSocket.receive(messageIn);
+                System.out.println("Recebido: " + new String(messageIn.getData()).trim());
+                buffer = new byte[1000];
+            }
+        } catch (IOException e) {
+            if (isConnected()) {
+                System.out.println("Erro ao receber mensagem: " + e.getMessage());
+            }
+        }
+    }
+    
+
     public static void main(String[] args) {
         if (args.length != 2) {
             System.out.println("É preciso executar o programa passando o nome do usuário e o host");
             return;
         }
-
+    
         ChatApp chatApp = new ChatApp();
-
+    
         chatApp.user = args[0];
         chatApp.host = args[1];
-
+    
         if (!chatApp.enterRoom()) {
             System.out.println("Não foi possível entrar no grupo multicast");
             return;
         }
-
+    
         chatApp.sendMessage("Usuario " + chatApp.user + " entrou na sala");
-
+    
         new Thread(chatApp::receiveMessages).start();
+    
         new Thread(() -> {
             try (java.util.Scanner scanner = new java.util.Scanner(System.in)) {
                 while (chatApp.isConnected()) {
@@ -71,4 +93,5 @@ public class ChatApp {
             }
         }).start();
     }
+    
 }
